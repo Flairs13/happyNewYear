@@ -7,6 +7,7 @@ export const MainComponent = () => {
   return (
     <Container>
       <div>privet АРИИИШШАААА</div>
+      <div>kak dela?</div>
     </Container>
   );
 };
