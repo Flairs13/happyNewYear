@@ -1,14 +1,18 @@
 import {MainComponent} from "./pages/main";
 import '@mantine/core/styles.css';
 
-import { MantineProvider } from '@mantine/core';
+import { MantineProvider, createTheme } from '@mantine/core';
 import {Game} from "./pages/game";
 
+const theme = createTheme({
+
+});
 
 function App() {
 
+
   return (
-    <MantineProvider>
+    <MantineProvider defaultColorScheme="dark" theme={theme}>
       <MainComponent/>
       <Game/>
     </MantineProvider>

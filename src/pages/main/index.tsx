@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import video from '../../assets/testVideo.mp4'
+import video from '../../assets/IMG_0049.mp4'
 
 const Container = styled.div`
 `
