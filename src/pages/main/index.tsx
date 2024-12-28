@@ -6,7 +6,7 @@ const Container = styled.div`
 export const MainComponent = () => {
   return (
     <Container>
-      <div>privet</div>
+      <div>privet АРИИИШШАААА</div>
     </Container>
   );
 };
