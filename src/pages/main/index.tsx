@@ -1,11 +1,13 @@
 import styled from 'styled-components'
-import video from '../../assets/IMG_0049.mp4'
+import video from '../../assets/Star.mp4'
 
 const Container = styled.div`
+  height: 70vh;
 `
 const Video = styled.video`
     width: 100%;
     height: 100%;
+    object-fit: cover;
 `
 export const MainComponent = () => {
 

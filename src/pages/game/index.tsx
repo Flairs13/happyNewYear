@@ -13,7 +13,7 @@ const GamerComponent = (p: PropsGamer) => {
   return (
     <GamerWrapper>
       <TextInput label="Your name" placeholder={`Имя игрока ${numberGamer}`}/>
-      <Button onClick={() => p.removeGamer(p.index)} color={"red"} style={{alignSelf: 'end'}}>Удалить игрока {numberGamer}</Button>
+      <Button onClick={() => p.removeGamer(p.index)} color={"yellow"} style={{alignSelf: 'end'}}>Удалить игрока {numberGamer}</Button>
     </GamerWrapper>
   )
 }
@@ -48,7 +48,7 @@ export const Game = () => {
     <Container>
       <GamersContainer>
         <InputsGamerWrapper>
-          <Button color={"green"} onClick={addGamer}>Добавить игрока</Button>
+          <Button color={"#ecb11a"} onClick={addGamer}>Добавить игрока</Button>
           <Fieldset legend="Введите игроков">
             {gamersCountArr.map((_, index) => <GamerComponent key={index} index={index} removeGamer={removeGamer}/>)}
           </Fieldset>
