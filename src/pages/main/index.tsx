@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import video from '../../assets/Star.mp4'
+import video from '../../assets/Star_final_.mp4'
 
 const Container = styled.div`
   height: 70vh;

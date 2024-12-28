@@ -1,6 +1,6 @@
 import * as React from "react";
 import styled from 'styled-components'
-import {Fieldset, TextInput, Button} from '@mantine/core';
+import {Fieldset, TextInput, Button, Radio, Group} from '@mantine/core';
 
 
 
@@ -9,11 +9,31 @@ type PropsGamer = {
   removeGamer: (index: number) => void;
 }
 const GamerComponent = (p: PropsGamer) => {
+  const [gender, setGender] = React.useState<'male' | 'female'>('male');
   const numberGamer = p.index + 1;
   return (
     <GamerWrapper>
-      <TextInput label="Your name" placeholder={`Имя игрока ${numberGamer}`}/>
-      <Button onClick={() => p.removeGamer(p.index)} color={"yellow"} style={{alignSelf: 'end'}}>Удалить игрока {numberGamer}</Button>
+      <div>
+        <Radio.Group
+          value={gender}
+          onChange={(e) => setGender(e as 'male' | 'female')}
+          name="maleFamele"
+          label="Выбери кто ты"
+          description="Хозяйка альтушка или же Гигачад"
+        >
+          <Group mt="xs">
+            <Radio checked onChange={(e) => setGender(e.currentTarget.value as 'male' | 'female')} value="male" label="Гигачад" />
+            <Radio checked={gender === 'female'} onChange={(e) => setGender(e.currentTarget.value as 'male' | 'female')} value="female" label="Хозяйка" />
+          </Group>
+        </Radio.Group>
+        <TextInput onBlur={() => console.log(gender)} label="Хто ты?" placeholder={`Имя игрока ${numberGamer}`}/>
+      </div>
+
+      <Button
+        onClick={() => p.removeGamer(p.index)} color={"yellow"} style={{alignSelf: 'end'}}
+      >
+        Удалить игрока {numberGamer}
+      </Button>
     </GamerWrapper>
   )
 }
@@ -29,6 +49,7 @@ const GamerWrapper = styled.div`
     grid-template-columns: 1fr 1fr;
     grid-gap: 10px;
     align-items: center;
+    
 `
 const ActiveGamers = styled.div``
 export const Game = () => {
