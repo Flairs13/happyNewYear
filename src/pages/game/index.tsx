@@ -5,13 +5,20 @@ import lemurio from '../../assets/lemurio.png'
 import ukurish from '../../assets/ukurish.png'
 import svinkusya from '../../assets/svinkusya.png'
 import hachvin from '../../assets/hachvin.png'
-import {Fieldset, TextInput, Button, Radio, Group, Modal} from '@mantine/core';
+import {Fieldset, TextInput, Button, Modal} from '@mantine/core';
 
 
-type Icons = 'redEye' | 'lemurio' | 'ukurish' | 'svinkusya'
+type Icons = 'redEye' | 'lemurio' | 'ukurish' | 'svinkusya' | 'hachvin'
 
 
-const IconsData1 = {
+type IconsData = {
+  [key in Icons]: {
+    name: Icons;
+    src: string;
+    label: string;
+  }
+}
+const IconsData1: IconsData = {
   redEye: {
     name: 'redEye',
     src: redEyePng,
@@ -52,25 +59,54 @@ type PropsGamer = {
   setGamer: (gamer: Gamer) => void;
 }
 
-const RadioWrapper = styled.div`
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 10px;
-    align-content: center;
-`
-
 const ImgWrapper = styled.div`
-    width: 200px;
+    width: 280px;
     height: 200px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
+    margin: 0 auto;
+    background-color: gray;
 `
+const NameGamer = styled.div`
+    font-size: 20px;
+    text-align: center;
+`
+
+const RadioWrapper = styled.div`
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-gap: 10px;
+    align-content: center;
+    cursor: pointer;
+    justify-content: center;
+    
+    &:hover {
+        ${ImgWrapper} {
+            background-color: green;
+        }
+        ${NameGamer}{
+            color: green;
+        }
+    }
+    
+    &.active {
+        ${ImgWrapper} {
+            background-color: green;
+        }
+        ${NameGamer}{
+            color: green;
+        }
+    }
+`
+
+
+
 const ChouseWrapper = styled.div`
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    grid-gap: 30px;
+    grid-gap: 70px;
 `
 
 const ModalWrapper = styled.div`
@@ -84,6 +120,7 @@ const AvatarWrapper = styled.div`
     justify-content: center;
     align-items: center;
 `
+
 const GamerComponent = (p: PropsGamer) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const id = React.useId()
@@ -91,7 +128,7 @@ const GamerComponent = (p: PropsGamer) => {
   const [name, setName] = React.useState('');
   const numberGamer = p.index + 1;
 
-  const onBlur = () => p.setGamer({name,gender, id})
+  const onBlur = () => p.setGamer({name, gender, id})
   return (
     <GamerWrapper>
       <div>
@@ -115,25 +152,20 @@ const GamerComponent = (p: PropsGamer) => {
       </Button>
       <Modal size={'100%'} opened={isOpen} onClose={() => setIsOpen(false)}>
         <ModalWrapper>
-          <Group mt="xs">
-            <ChouseWrapper>
-              {Object.values(IconsData1).map(x => {
-                return (
-                  <RadioWrapper>
-                    <Radio
-                      value={x.name}
-                      onChange={(e) => setGender(e.currentTarget.value as Icons)}
-                      checked={gender === x.name}
-                      label={x.label}
-                    />
-                    <ImgWrapper>
-                      <img src={x.src} alt="red eye"/>
-                    </ImgWrapper>
-                  </RadioWrapper>
-                )
-              })}
-            </ChouseWrapper>
-          </Group>
+          <ChouseWrapper>
+            {Object.values(IconsData1).map(x => {
+              return (
+                <RadioWrapper className={gender === x.name ? 'active' : undefined} onClick={() => setGender(x.name)}>
+                  <ImgWrapper>
+                    <img src={x.src} alt="red eye"/>
+                  </ImgWrapper>
+                  <NameGamer>
+                    {x.label}
+                  </NameGamer>
+                </RadioWrapper>
+              )
+            })}
+          </ChouseWrapper>
         </ModalWrapper>
       </Modal>
     </GamerWrapper>
@@ -167,15 +199,15 @@ const GamerWrapper = styled.div`
     grid-template-columns: 1fr 1fr;
     grid-gap: 10px;
     align-items: center;
-    
+
 `
 const ActiveGamers = styled.div``
 export const Game = () => {
 
-  const [gamersCountArr, setGamersCount] = React.useState([1,2]);
+  const [gamersCountArr, setGamersCount] = React.useState([1, 2]);
   const [activeGamers, setActiveGamers] = React.useState<Gamer[]>([]);
 
-  const setActiveGamer = (gamer:Gamer) => setActiveGamers(prev => [...prev, gamer])
+  const setActiveGamer = (gamer: Gamer) => setActiveGamers(prev => [...prev, gamer])
 
   const removeGamer = (index: number) => {
     if (gamersCountArr.length === 1) return;
