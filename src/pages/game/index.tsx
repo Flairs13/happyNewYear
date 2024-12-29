@@ -5,7 +5,10 @@ import lemurio from '../../assets/lemurio.png'
 import ukurish from '../../assets/ukurish.png'
 import svinkusya from '../../assets/svinkusya.png'
 import hachvin from '../../assets/hachvin.png'
-import {Fieldset, TextInput, Button, Modal} from '@mantine/core';
+import {TextInput, Button, Modal, Card, Image, Text, Group} from '@mantine/core';
+
+
+
 
 
 type Icons = 'redEye' | 'lemurio' | 'ukurish' | 'svinkusya' | 'hachvin'
@@ -16,33 +19,39 @@ type IconsData = {
     name: Icons;
     src: string;
     label: string;
+    info?: string;
   }
 }
 const IconsData1: IconsData = {
   redEye: {
     name: 'redEye',
     src: redEyePng,
-    label: 'Красный Бубалех'
+    label: 'Красный Бубалех',
+    info: 'Красный Бубалех — мастер хаоса, чьи действия непредсказуемы, а присутствие вызывает вспышки ярости и необъяснимого везения у всех вокруг!'
   },
   lemurio: {
     name: 'lemurio',
     src: lemurio,
-    label: 'Лемурио'
+    label: 'Лемурио',
+    info: 'Лемурио — загадочный странник из мира теней, который умеет исчезать в дымке, оставляя за собой шепот древних тайн и чувство, что он всегда на шаг впереди'
   },
   ukurish: {
     name: 'ukurish',
     src: ukurish,
-    label: 'Укурыш'
+    label: 'Укурыш',
+    info: 'Укурыш — беззаботный хулиган, чья голова всегда в облаках, а в кармане найдётся что-то неожиданное: от конфет до планов захвата мира.'
   },
   svinkusya: {
     name: 'svinkusya',
     src: svinkusya,
-    label: 'Свинкуся'
+    label: 'Свинкуся',
+    info: 'Свинкуся — очаровательная бунтарка, которая сочетает в себе милоту и дерзость, умея хрюкнуть так, что это становится последним словом в любом споре.'
   },
   hachvin: {
     name: 'hachvin',
     src: hachvin,
-    label: 'Хачвин'
+    label: 'Хачвин',
+    info: 'Хачвин — харизматичный гурман с душой авантюриста, который превращает любое блюдо в шедевр, а любую встречу — в незабываемое приключение.'
   },
 }
 
@@ -81,26 +90,27 @@ const RadioWrapper = styled.div`
     align-content: center;
     cursor: pointer;
     justify-content: center;
-    
+
     &:hover {
         ${ImgWrapper} {
-            background-color: green;
+            background-color: #4faf4f;
         }
-        ${NameGamer}{
-            color: green;
+
+        ${NameGamer} {
+            color: #4faf4f;
         }
     }
-    
+
     &.active {
         ${ImgWrapper} {
-            background-color: green;
+            background-color: #4faf4f;
         }
-        ${NameGamer}{
-            color: green;
+
+        ${NameGamer} {
+            color: #4faf4f;
         }
     }
 `
-
 
 
 const ChouseWrapper = styled.div`
@@ -112,14 +122,9 @@ const ChouseWrapper = styled.div`
 const ModalWrapper = styled.div`
     padding: 20px;
 `
-const AvatarWrapper = styled.div`
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
+
+const GamerControl = styled.div``
+
 
 const GamerComponent = (p: PropsGamer) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -128,29 +133,42 @@ const GamerComponent = (p: PropsGamer) => {
   const [name, setName] = React.useState('');
   const numberGamer = p.index + 1;
 
+  const currItem = IconsData1[gender]
+
   const onBlur = () => p.setGamer({name, gender, id})
   return (
-    <GamerWrapper>
-      <div>
-        <TextInput
-          value={name}
-          onBlur={onBlur}
-          onChange={(e) => setName(e.currentTarget.value)}
-          label="Хто ты?"
-          placeholder={`Имя игрока ${numberGamer}`}/>
-      </div>
-      <AvatarWrapper>
-        <img src={IconsData1[gender].src} alt={gender}/>
-      </AvatarWrapper>
-      <Button
-        onClick={() => p.removeGamer(p.index)} color={"yellow"} style={{alignSelf: 'end'}}
-      >
-        Удалить игрока {numberGamer}
-      </Button>
-      <Button onClick={() => setIsOpen(true)}>
-        Выбрать игрока
-      </Button>
-      <Modal size={'100%'} opened={isOpen} onClose={() => setIsOpen(false)}>
+    <>
+      <GamerWrapper>
+        <Card __size={"20"} shadow="sm" style={{cursor: "pointer"}} padding="lg" radius="md" withBorder>
+          <Card.Section onClick={() => setIsOpen(true)}>
+            <Image
+              src={currItem.src}
+              height={160}
+              alt="Norway"
+            />
+          </Card.Section>
+
+          <Group justify="space-between" mt="md" mb="xs">
+            <Text fz={28} fw={500}>{currItem.label}</Text>
+          </Group>
+          <GamerControl>
+            <TextInput
+              value={name}
+              onBlur={onBlur}
+              onChange={(e) => setName(e.currentTarget.value)}
+              label="Хто ты?"
+              placeholder={`Имя игрока ${numberGamer}`}/>
+          </GamerControl>
+          <Text mt="md" size="sm" c="dimmed">
+            {currItem.info}
+          </Text>
+
+          <Button onClick={() => p.removeGamer(p.index)} color="blue" fullWidth mt="md" radius="md">
+            Удалить игрока {numberGamer}
+          </Button>
+        </Card>
+      </GamerWrapper>
+      <Modal size={'100%'} style={{opacity: '1'}} opened={isOpen} onClose={() => setIsOpen(false)}>
         <ModalWrapper>
           <ChouseWrapper>
             {Object.values(IconsData1).map(x => {
@@ -168,7 +186,7 @@ const GamerComponent = (p: PropsGamer) => {
           </ChouseWrapper>
         </ModalWrapper>
       </Modal>
-    </GamerWrapper>
+    </>
   )
 }
 // type PropsActiveGamers = {
@@ -184,7 +202,9 @@ const GamerComponent = (p: PropsGamer) => {
 
 const Container = styled.div`
     user-select: none;
-    padding: 100px;
+    padding: 30px;
+    max-width: 80vw;
+    margin: 0 auto;
 `
 const GamersContainer = styled.div`
     display: grid;
@@ -195,11 +215,17 @@ const InputsGamerWrapper = styled.div`
     max-width: 100%;
 `
 const GamerWrapper = styled.div`
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 10px;
-    align-items: center;
+    //display: grid;
+    //grid-template-columns: 1fr 1fr;
+    //grid-gap: 10px;
+    //align-items: center;
 
+`
+const GamersFieldSetWrapper = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    
+    gap: 40px;
 `
 const ActiveGamers = styled.div``
 export const Game = () => {
@@ -223,9 +249,9 @@ export const Game = () => {
       <GamersContainer>
         <InputsGamerWrapper>
           <Button color={"#ecb11a"} onClick={addGamer}>Добавить игрока</Button>
-          <Fieldset legend="Введите игроков">
+          <GamersFieldSetWrapper>
             {gamersCountArr.map((_, index) => <GamerComponent setGamer={setActiveGamer} key={index} index={index} removeGamer={removeGamer}/>)}
-          </Fieldset>
+          </GamersFieldSetWrapper>
         </InputsGamerWrapper>
       </GamersContainer>
       <ActiveGamers>
