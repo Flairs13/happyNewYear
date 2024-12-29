@@ -2,31 +2,37 @@ import * as React from "react";
 import styled from 'styled-components'
 import {Fieldset, TextInput, Button, Radio, Group} from '@mantine/core';
 
-
+type Gamer = {
+  id: string;
+  gender: 'male' | 'female';
+  name: string;
+}
 
 type PropsGamer = {
   index: number;
   removeGamer: (index: number) => void;
+  setGamer: (gamer: Gamer) => void;
 }
 const GamerComponent = (p: PropsGamer) => {
+  const id = React.useId()
   const [gender, setGender] = React.useState<'male' | 'female'>('male');
+  const [name, setName] = React.useState('');
   const numberGamer = p.index + 1;
+
+  const onBlur = () => p.setGamer({name,gender, id})
   return (
     <GamerWrapper>
       <div>
-        <Radio.Group
-          value={gender}
-          onChange={(e) => setGender(e as 'male' | 'female')}
-          name="maleFamele"
-          label="Выбери кто ты"
-          description="Хозяйка альтушка или же Гигачад"
-        >
-          <Group mt="xs">
-            <Radio checked onChange={(e) => setGender(e.currentTarget.value as 'male' | 'female')} value="male" label="Гигачад" />
-            <Radio checked={gender === 'female'} onChange={(e) => setGender(e.currentTarget.value as 'male' | 'female')} value="female" label="Хозяйка" />
-          </Group>
-        </Radio.Group>
-        <TextInput onBlur={() => console.log(gender)} label="Хто ты?" placeholder={`Имя игрока ${numberGamer}`}/>
+        <Group mt="xs">
+          <Radio onChange={(e) => setGender(e.currentTarget.value as 'male' | 'female')} checked={gender === 'male'} value="male" label="Гигачад" />
+          <Radio onChange={(e) => setGender(e.currentTarget.value as 'male' | 'female')} checked={gender === 'female'} value="female" label="Хозяйка" />
+        </Group>
+        <TextInput
+          value={name}
+          onBlur={onBlur}
+          onChange={(e) => setName(e.currentTarget.value)}
+          label="Хто ты?"
+          placeholder={`Имя игрока ${numberGamer}`}/>
       </div>
 
       <Button
@@ -39,8 +45,15 @@ const GamerComponent = (p: PropsGamer) => {
 }
 
 
-const Container = styled.div``
-const GamersContainer = styled.div``
+const Container = styled.div`
+    user-select: none;
+    padding: 100px;
+`
+const GamersContainer = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 70px;
+`
 const InputsGamerWrapper = styled.div`
     max-width: 500px;
 `
@@ -54,7 +67,10 @@ const GamerWrapper = styled.div`
 const ActiveGamers = styled.div``
 export const Game = () => {
 
-  const [gamersCountArr, setGamersCount] = React.useState([1]);
+  const [gamersCountArr, setGamersCount] = React.useState([1,2]);
+  const [activeGamers, setActiveGamers] = React.useState<Gamer[]>([]);
+
+  const setActiveGamer = (gamer:Gamer) => setActiveGamers(prev => [...prev, gamer])
 
   const removeGamer = (index: number) => {
     if (gamersCountArr.length === 1) return;
@@ -71,11 +87,19 @@ export const Game = () => {
         <InputsGamerWrapper>
           <Button color={"#ecb11a"} onClick={addGamer}>Добавить игрока</Button>
           <Fieldset legend="Введите игроков">
-            {gamersCountArr.map((_, index) => <GamerComponent key={index} index={index} removeGamer={removeGamer}/>)}
+            {gamersCountArr.map((_, index) => <GamerComponent setGamer={setActiveGamer} key={index} index={index} removeGamer={removeGamer}/>)}
           </Fieldset>
         </InputsGamerWrapper>
         <ActiveGamers>
-          <div>actiove</div>
+          {activeGamers.map((gamer, index: number) => {
+            return (
+              <div>
+                <span style={{marginRight: '20px'}}>игрок {index + 1}</span>
+                <span style={{marginRight: '20px'}}>{gamer.gender}</span>
+                <span key={gamer.id}>{gamer.name}</span>
+              </div>
+            )
+          })}
         </ActiveGamers>
       </GamersContainer>
     </Container>
