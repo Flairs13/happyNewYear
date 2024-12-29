@@ -1,20 +1,19 @@
 import * as React from "react";
 import styled from 'styled-components'
-import redEyePng from '../../assets/redEye1.png'
+import redEyePng from '../../assets/redEye.png'
 import lemurio from '../../assets/lemurio.png'
 import ukurish from '../../assets/ukurish.png'
 import svinkusya from '../../assets/svinkusya.png'
 import hachvin from '../../assets/hachvin.png'
 import {TextInput, Button, Modal, Card, Image, Text, Group} from '@mantine/core';
+import {GameActive} from "./gameActive.tsx";
 
 
+export type Icons = 'redEye' | 'lemurio' | 'ukurish' | 'svinkusya' | 'hachvin'
+export type GameStatus = 'active' | 'notActive' | 'finished'
 
 
-
-type Icons = 'redEye' | 'lemurio' | 'ukurish' | 'svinkusya' | 'hachvin'
-
-
-type IconsData = {
+export type IconsData = {
   [key in Icons]: {
     name: Icons;
     src: string;
@@ -22,12 +21,12 @@ type IconsData = {
     info?: string;
   }
 }
-const IconsData1: IconsData = {
+export const IconsData1: IconsData = {
   redEye: {
     name: 'redEye',
     src: redEyePng,
     label: 'Красный Бубалех',
-    info: 'Красный Бубалех — мастер хаоса, чьи действия непредсказуемы, а присутствие вызывает вспышки ярости и необъяснимого везения у всех вокруг!'
+    info: 'Красный Бубалех — огненный проказник, чья энергия способна перевернуть мир с ног на голову, а хитрая улыбка всегда сулит нечто грандиозное и слегка опасное.'
   },
   lemurio: {
     name: 'lemurio',
@@ -51,12 +50,12 @@ const IconsData1: IconsData = {
     name: 'hachvin',
     src: hachvin,
     label: 'Хачвин',
-    info: 'Хачвин — харизматичный гурман с душой авантюриста, который превращает любое блюдо в шедевр, а любую встречу — в незабываемое приключение.'
+    info: 'Хачвин — легендарный, харизматичный гурман, который провёл три года в заточении за эпическое преступление: бокал вина, случайно пролитый на священный диван, стал причиной его мрачной, но полной приключений истории.'
   },
 }
 
 
-type Gamer = {
+export type Gamer = {
   id: string;
   gender: Icons;
   name: string;
@@ -64,7 +63,7 @@ type Gamer = {
 
 type PropsGamer = {
   index: number;
-  removeGamer: (index: number) => void;
+  removeGamer: (index: number, id: string) => void;
   setGamer: (gamer: Gamer) => void;
 }
 
@@ -139,11 +138,11 @@ const GamerComponent = (p: PropsGamer) => {
   return (
     <>
       <GamerWrapper>
-        <Card __size={"20"} shadow="sm" style={{cursor: "pointer"}} padding="lg" radius="md" withBorder>
+        <Card shadow="sm" style={{cursor: "pointer"}} padding="lg" radius="xs" withBorder>
           <Card.Section onClick={() => setIsOpen(true)}>
             <Image
               src={currItem.src}
-              height={160}
+              height={25}
               alt="Norway"
             />
           </Card.Section>
@@ -162,8 +161,9 @@ const GamerComponent = (p: PropsGamer) => {
           <Text mt="md" size="sm" c="dimmed">
             {currItem.info}
           </Text>
-
-          <Button onClick={() => p.removeGamer(p.index)} color="blue" fullWidth mt="md" radius="md">
+          <Button onClick={() => {
+            p.removeGamer(p.index, id)
+          }} color="blue" fullWidth mt="md" radius="md">
             Удалить игрока {numberGamer}
           </Button>
         </Card>
@@ -173,7 +173,11 @@ const GamerComponent = (p: PropsGamer) => {
           <ChouseWrapper>
             {Object.values(IconsData1).map(x => {
               return (
-                <RadioWrapper className={gender === x.name ? 'active' : undefined} onClick={() => setGender(x.name)}>
+                <RadioWrapper className={gender === x.name ? 'active' : undefined} onClick={() => {
+                  setGender(x.name)
+                  setIsOpen(false)
+                  p.setGamer({name, gender: x.name, id})
+                }}>
                   <ImgWrapper>
                     <img src={x.src} alt="red eye"/>
                   </ImgWrapper>
@@ -189,22 +193,76 @@ const GamerComponent = (p: PropsGamer) => {
     </>
   )
 }
-// type PropsActiveGamers = {
-//   activeGamers: Gamer[];
-//
-// }
-// const ActiveGamersComponent = (p: PropsActiveGamers) => {
-//   return (
-//     <div>2</div>
-//   )
-// }
+
+
+const ActiveGamerContainer = styled.div`
+    margin-top: 50px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border: 3px solid gray;
+`
+const ActiveGamerWrapper = styled.div`
+    border-right: 3px solid gray;
+    border-bottom: 3px solid gray;
+    position: relative;
+
+    &.deletedGamer {
+        background-color: #b34444;
+    }
+`
+const ButtonWrapperOut = styled.div`
+    position: absolute;
+    top: 20px;
+    left: 20px;
+`
+type PropsActiveGamers = {
+  activeGamers: Gamer[];
+  setNotActiveGamer: (gamer: Gamer) => void;
+  deletedGamers: Record<string, Gamer>
+}
+const ActiveGamersComponent = (p: PropsActiveGamers) => {
+
+  const render = () => {
+    if (p.activeGamers.length === 0) {
+      return (
+        <div>Нету Игроков</div>
+      )
+    }
+    return p.activeGamers.map(gamer => {
+      const isDeleted = p.deletedGamers[gamer.id];
+      const currItem = IconsData1[gamer.gender]
+      return (
+        <ActiveGamerWrapper className={isDeleted ? 'deletedGamer' : undefined}>
+          <Image
+            src={currItem.src}
+            height={25}
+            alt={currItem.name}
+          />
+          <div>{gamer.name}</div>
+          <div>{currItem.label}</div>
+          <ButtonWrapperOut>
+            <Button onClick={() => p.setNotActiveGamer(gamer)} color={"#f4d03f"}>Удалить из игры</Button>
+          </ButtonWrapperOut>
+        </ActiveGamerWrapper>
+      )
+    })
+  }
+
+  return (
+    <Container>
+      <ActiveGamerContainer>
+        {render()}
+      </ActiveGamerContainer>
+    </Container>
+  )
+}
 
 
 const Container = styled.div`
     user-select: none;
-    padding: 30px;
     max-width: 80vw;
     margin: 0 auto;
+    position: relative;
 `
 const GamersContainer = styled.div`
     display: grid;
@@ -224,47 +282,71 @@ const GamerWrapper = styled.div`
 const GamersFieldSetWrapper = styled.div`
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    
     gap: 40px;
 `
 const ActiveGamers = styled.div``
+const ButtonStartGame = styled.div`
+    position: fixed;
+    right: 20px;
+    top: 20px;
+`
+const GameBody = styled.div`
+    position: relative;
+`
 export const Game = () => {
 
   const [gamersCountArr, setGamersCount] = React.useState([1, 2]);
-  const [activeGamers, setActiveGamers] = React.useState<Gamer[]>([]);
+  const [gameStatus, setGameStatus] = React.useState<GameStatus>('notActive');
+  const [activeGamers, setActiveGamers] = React.useState<Record<string, Gamer>>({});
+  const [deletedGamers, setDeletedGamers] = React.useState<Record<string, Gamer>>({});
 
-  const setActiveGamer = (gamer: Gamer) => setActiveGamers(prev => [...prev, gamer])
-
-  const removeGamer = (index: number) => {
-    if (gamersCountArr.length === 1) return;
-    setGamersCount(prev => prev.slice(0, index).concat(prev.slice(index + 1)))
+  const setActiveGamer = (gamer: Gamer) => {
+    setActiveGamers(prev => ({...prev, [gamer.id]: gamer}))
+  }
+  const setNotActiveGamer = (gamer: Gamer) => {
+    setDeletedGamers(prev => ({...prev, [gamer.id]: gamer}))
   }
 
+  const removeGamer = (index: number, id: string) => {
+    if (gamersCountArr.length === 1) return;
+    setGamersCount(prev => prev.slice(0, index).concat(prev.slice(index + 1)))
+    setActiveGamers(prev => {
+      const newGamers = {...prev}
+      delete newGamers[id]
+      return newGamers
+    })
+  }
 
   const addGamer = () => {
     setGamersCount(prev => [...prev, 1])
   }
+
+  console.log(deletedGamers, 'DELETED')
   return (
     <Container>
-      <GamersContainer>
-        <InputsGamerWrapper>
-          <Button color={"#ecb11a"} onClick={addGamer}>Добавить игрока</Button>
-          <GamersFieldSetWrapper>
-            {gamersCountArr.map((_, index) => <GamerComponent setGamer={setActiveGamer} key={index} index={index} removeGamer={removeGamer}/>)}
-          </GamersFieldSetWrapper>
-        </InputsGamerWrapper>
-      </GamersContainer>
-      <ActiveGamers>
-        {activeGamers.map((gamer, index: number) => {
-          return (
-            <div>
-              <span style={{marginRight: '20px'}}>игрок {index + 1}</span>
-              <span style={{marginRight: '20px'}}>{gamer.gender}</span>
-              <span key={gamer.id}>{gamer.name}</span>
-            </div>
-          )
-        })}
-      </ActiveGamers>
+      <GameBody>
+        <GamersContainer>
+          <InputsGamerWrapper>
+            <Button color={"#ecb11a"} onClick={addGamer}>Добавить игрока</Button>
+            <GamersFieldSetWrapper>
+              {gamersCountArr.map((_, index) => <GamerComponent setGamer={setActiveGamer} key={index} index={index} removeGamer={removeGamer}/>)}
+            </GamersFieldSetWrapper>
+          </InputsGamerWrapper>
+        </GamersContainer>
+        <ActiveGamers>
+          <ActiveGamersComponent
+            setNotActiveGamer={setNotActiveGamer}
+            activeGamers={Object.values(activeGamers)}
+            deletedGamers={deletedGamers}
+          />
+        </ActiveGamers>
+        {gameStatus === 'notActive' && (
+          <ButtonStartGame onClick={() => setGameStatus('active')}>
+            <Button>Начать игру!!!!!!!</Button>
+          </ButtonStartGame>
+        )}
+        <GameActive setGameStatus={(x: GameStatus) => setGameStatus(x)} deletedGamers={deletedGamers} activeGamers={activeGamers} gameStatus={gameStatus} />
+      </GameBody>
     </Container>
   );
 };

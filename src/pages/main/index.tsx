@@ -2,7 +2,9 @@ import styled from 'styled-components'
 import video from '../../assets/Star_snow.mp4'
 
 const Container = styled.div`
-  height: 85vh;
+    height: 85vh;
+    position: relative;
+    z-index: 9;
 `
 const Video = styled.video`
     width: 100%;
