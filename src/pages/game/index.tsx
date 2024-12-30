@@ -321,7 +321,6 @@ export const Game = () => {
     setGamersCount(prev => [...prev, 1])
   }
 
-  console.log(deletedGamers, 'DELETED')
   return (
     <Container>
       <GameBody>

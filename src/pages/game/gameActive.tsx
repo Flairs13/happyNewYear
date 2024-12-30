@@ -1,7 +1,118 @@
-import {Gamer, GameStatus} from "./index.tsx";
-// import * as React from "react";
-import {Modal} from "@mantine/core";
+import styled from "styled-components";
+import {Gamer, GameStatus, IconsData1} from "./index.tsx";
+import {Button, Card, Group,Modal, Text} from "@mantine/core";
+import * as React from "react";
 
+const GiftsArr = [
+  {
+    name: 'Топор',
+    icon: 'https://img.freepik.com/premium-vector/axe-editable-doodle-hand-drawn-icon-axe-camping-hiking-local-tourism-illustration_549897-848.jpg',
+  },
+  {
+    name: 'Земля',
+    icon: 'https://cdn.pixabay.com/photo/2011/12/13/14/31/earth-11015_640.jpg',
+  },
+  {
+    name: 'Телепузик',
+    icon: 'https://masterpiecer-images.s3.yandex.net/e6dc58cb825a11eeb3fabe3d04098890:upscaled',
+  },
+  {
+    name: 'Город',
+    icon: 'https://www.astons.com/wp-content/uploads/2024/03/article_poptown_tokio.webp',
+  },
+
+]
+
+function randomInteger(min: number, max: number) {
+  // случайное число от min до (max+1)
+  const rand = min + Math.random() * (max + 1 - min);
+  return Math.floor(rand);
+}
+const getRandomItem = (arr: Array<{name: string, icon: string}>) => {
+  const arrLength = arr.length;
+  const randomIndex = randomInteger(0, arrLength - 1);
+  return arr[randomIndex];
+}
+
+const TakeGiftContainer = styled.div`
+    padding: 30px 20px;
+`
+const TimeContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+`
+const Time = styled.div`
+    font-size: 180px;
+    margin: 0 10px;
+    line-height: 1;
+`
+const TakeGift = () => {
+  const [startTime, setStartTime] = React.useState(false);
+  const [time, setTime] = React.useState(10);
+  const [gift, setGift] = React.useState(false);
+
+  const renderTime = () => {
+    if (startTime) {
+      return (
+        <TimeContainer>
+          <Time>{time}</Time>
+        </TimeContainer>
+      )
+    }
+  }
+
+  const renderGift = () => {
+    if (!gift) return null
+    const item = getRandomItem(GiftsArr)
+    return (
+      <div>
+        <ImgWrapper>
+          <img src={item.icon} alt="#"/>
+        </ImgWrapper>
+      </div>
+    )
+  }
+
+  React.useEffect(() => {
+    const interval = setInterval(() => setTime(prev => prev - 1), 1000)
+    if (time === 0) {
+      clearInterval(interval)
+      setGift(true)
+      setTime(10)
+      setStartTime(false)
+    }
+    if (!startTime) clearInterval(interval)
+
+    return () => clearInterval(interval)
+  }, [startTime, time]);
+  return (
+    <TakeGiftContainer>
+      {renderGift()}
+      {renderTime()}
+      {!startTime && !gift && <Button onClick={() => setStartTime(true)} fullWidth>ЗАБРАТЬ ПОДАРОК!</Button>}
+    </TakeGiftContainer>
+  )
+}
+
+
+const ImgWrapper = styled.div`
+    width: 500px;
+    margin: 0 auto;
+    height: 500px;
+
+    & > img {
+        width: 100%;
+        height: 100%;
+    }
+`
+
+const WinnerName = styled.div`
+    font-size: 200px;
+    text-align: center;
+    line-height: 1;
+`
 
 type Props = {
   deletedGamers: Record<string, Gamer>,
@@ -10,21 +121,55 @@ type Props = {
   setGameStatus: (x: GameStatus) => void,
 
 }
+
+const calcWinner = (active: Record<string, Gamer>, deleted: Record<string, Gamer>) => {
+  const arrDeletedId = Object.keys(deleted);
+  const winnerId = Object.keys(active).filter(x => !arrDeletedId.includes(x));
+  if (winnerId.length === 1) {
+    return active[winnerId[0]];
+  }
+}
 export const GameActive = (p: Props) => {
+  const winner = calcWinner(p.activeGamers, p.deletedGamers);
+
+
   console.log('GAME STATUS', p.gameStatus)
 
-  const foo = () => {
-      if (Object.values(p.activeGamers).length - Object.values(p.deletedGamers).length === 1 && p.gameStatus === 'active') {
-        p.setGameStatus('finished')
-        console.log('OPEN MODAL!', p.gameStatus)
-      }
-      return null
+  const rednerWinner = () => {
+    if (winner) {
+      const currItem = IconsData1[winner.gender]
+      return (
+        <Card shadow="sm" style={{cursor: "pointer"}} padding="lg" radius="xs" withBorder>
+          <Text style={{textAlign: 'center'}} fz={60} fw={500}>ПОБЕДИТЕЛЬ!!!</Text>
+          <Card.Section>
+            <ImgWrapper>
+              <img src={currItem.src} alt="#"/>
+            </ImgWrapper>
+          </Card.Section>
+
+          <WinnerName>{winner.name}</WinnerName>
+          <Group justify="space-between" mt="md" mb="xs">
+            <Text fz={70} fw={500}>{currItem.label}</Text>
+          </Group>
+          <Text fz={20} mt="md" size="sm" c="dimmed">
+            {currItem.info}
+          </Text>
+        </Card>
+      )
+    }
   }
+
+  React.useEffect(() => {
+    if (winner && p.gameStatus === 'active') {
+      p.setGameStatus('finished')
+    }
+  }, [winner])
+
   return (
     <div>
-      {foo()}
-      <Modal opened={p.gameStatus === 'finished'} onClose={() => p.setGameStatus('notActive')}>
-        <div>POBEDA CYKJA</div>
+      <Modal size="100%" opened={p.gameStatus === 'finished'} onClose={() => p.setGameStatus('notActive')}>
+        {rednerWinner()}
+        <TakeGift/>
       </Modal>
     </div>
   );
