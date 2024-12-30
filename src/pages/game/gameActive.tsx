@@ -21,8 +21,7 @@ const GiftsArr = [
     icon: 'https://www.astons.com/wp-content/uploads/2024/03/article_poptown_tokio.webp',
   },
 ]
-localStorage.setItem('GiftsArr', JSON.stringify(GiftsArr))
-sessionStorage.setItem('GiftsArr', JSON.stringify(GiftsArr))
+
 
 
 function randomInteger(min: number, max: number) {
@@ -50,18 +49,20 @@ const Time = styled.div`
     margin: 0 10px;
     line-height: 1;
 `
-const TakeGift = () => {
+const TakeGift = (p: {arrGift: {name: string, icon: string}[]}) => {
   const [startTime, setStartTime] = React.useState(false);
   const [time, setTime] = React.useState(10);
   const [gift, setGift] = React.useState(false);
-  const arrGift = React.useRef<Array<{name: string, icon: string}>>([])
+
+  const winnerGift = React.useRef<{name: string, icon: string}>(null);
+
   React.useEffect(() => {
-    const giftArr = localStorage.getItem('GiftsArr') ? JSON.parse(localStorage.getItem('GiftsArr') as string) : []
-    if (!giftArr) localStorage.setItem('GiftsArr', JSON.stringify(GiftsArr))
-    arrGift.current = giftArr
-  }, [])
-
-
+    const item = getRandomItem(p.arrGift)
+    if (item && !gift){
+      winnerGift.current = item
+      localStorage.setItem('GiftsArr', JSON.stringify(p.arrGift.filter((x: {name: string, icon: string}) => x.name !== item.name)))
+    }
+  },[gift])
 
 
   const renderTime = () => {
@@ -75,18 +76,17 @@ const TakeGift = () => {
   }
 
   const renderGift = () => {
-    const item = getRandomItem(arrGift.current)
-    if (!item) return <div>ПОДАРКИ ЗАКОНЧИЛИСЬ :(</div>
-    console.log('ЕЕЕЕ БЛЯХЯ МУХА')
-    localStorage.setItem('GiftsArr', JSON.stringify(arrGift.current.filter((x: {name: string, icon: string}) => x.name !== item.name)))
+    if (p.arrGift.length === 0) return <div>ПОДАРКИ ЗАКОНЧИЛИСЬ :(</div>
 
-    return (
-      <div>
-        <ImgWrapper>
-          <img src={item.icon} alt="#"/>
-        </ImgWrapper>
-      </div>
-    )
+    if (winnerGift.current){
+      return (
+        <div>
+          <ImgWrapper>
+            <img src={winnerGift.current.icon} alt="#"/>
+          </ImgWrapper>
+        </div>
+      )
+    }
   }
 
   React.useEffect(() => {
@@ -173,6 +173,15 @@ export const GameActive = (p: Props) => {
     }
   }
 
+  const arrGift = React.useRef<Array<{name: string, icon: string}>>([])
+
+  React.useEffect(() => {
+    const giftArr = localStorage.getItem('GiftsArr') ? JSON.parse(localStorage.getItem('GiftsArr') as string) : null
+    if (!giftArr) localStorage.setItem('GiftsArr', JSON.stringify(GiftsArr))
+    arrGift.current = giftArr
+  }, [])
+
+
   React.useEffect(() => {
     if (winner && p.gameStatus === 'active') {
       p.setGameStatus('finished')
@@ -183,7 +192,7 @@ export const GameActive = (p: Props) => {
     <div>
       <Modal size="100%" opened={p.gameStatus === 'finished'} onClose={() => p.setGameStatus('notActive')}>
         {rednerWinner()}
-        <TakeGift/>
+        <TakeGift arrGift={arrGift.current}/>
       </Modal>
     </div>
   );

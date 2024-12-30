@@ -215,10 +215,16 @@ const ButtonWrapperOut = styled.div`
     top: 20px;
     left: 20px;
 `
+const StartGame = styled.div`
+    font-size: 70px;
+    text-align: center;
+    margin-top: 50px;
+`
 type PropsActiveGamers = {
   activeGamers: Gamer[];
   setNotActiveGamer: (gamer: Gamer) => void;
   deletedGamers: Record<string, Gamer>
+  gameStatus: GameStatus
 }
 const ActiveGamersComponent = (p: PropsActiveGamers) => {
 
@@ -241,7 +247,10 @@ const ActiveGamersComponent = (p: PropsActiveGamers) => {
           <div>{gamer.name}</div>
           <div>{currItem.label}</div>
           <ButtonWrapperOut>
-            <Button onClick={() => p.setNotActiveGamer(gamer)} color={"#f4d03f"}>Удалить из игры</Button>
+            <Button onClick={() => {
+              if (p.gameStatus === 'notActive') return
+              p.setNotActiveGamer(gamer)
+            }} color={"#f4d03f"}>Удалить из игры</Button>
           </ButtonWrapperOut>
         </ActiveGamerWrapper>
       )
@@ -250,6 +259,7 @@ const ActiveGamersComponent = (p: PropsActiveGamers) => {
 
   return (
     <Container>
+      {p.gameStatus === 'active' && <StartGame>Игра началась</StartGame>}
       <ActiveGamerContainer>
         {render()}
       </ActiveGamerContainer>
@@ -300,6 +310,8 @@ export const Game = () => {
   const [activeGamers, setActiveGamers] = React.useState<Record<string, Gamer>>({});
   const [deletedGamers, setDeletedGamers] = React.useState<Record<string, Gamer>>({});
 
+
+
   const setActiveGamer = (gamer: Gamer) => {
     setActiveGamers(prev => ({...prev, [gamer.id]: gamer}))
   }
@@ -334,6 +346,7 @@ export const Game = () => {
         </GamersContainer>
         <ActiveGamers>
           <ActiveGamersComponent
+            gameStatus={gameStatus}
             setNotActiveGamer={setNotActiveGamer}
             activeGamers={Object.values(activeGamers)}
             deletedGamers={deletedGamers}
