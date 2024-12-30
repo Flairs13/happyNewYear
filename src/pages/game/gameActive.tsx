@@ -21,6 +21,9 @@ const GiftsArr = [
     icon: 'https://www.astons.com/wp-content/uploads/2024/03/article_poptown_tokio.webp',
   },
 ]
+localStorage.setItem('GiftsArr', JSON.stringify(GiftsArr))
+sessionStorage.setItem('GiftsArr', JSON.stringify(GiftsArr))
+
 
 function randomInteger(min: number, max: number) {
   // случайное число от min до (max+1)
