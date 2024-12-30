@@ -20,7 +20,6 @@ const GiftsArr = [
     name: 'Город',
     icon: 'https://www.astons.com/wp-content/uploads/2024/03/article_poptown_tokio.webp',
   },
-
 ]
 
 function randomInteger(min: number, max: number) {
@@ -52,6 +51,15 @@ const TakeGift = () => {
   const [startTime, setStartTime] = React.useState(false);
   const [time, setTime] = React.useState(10);
   const [gift, setGift] = React.useState(false);
+  const arrGift = React.useRef<Array<{name: string, icon: string}>>([])
+  React.useEffect(() => {
+    const giftArr = localStorage.getItem('GiftsArr') ? JSON.parse(localStorage.getItem('GiftsArr') as string) : null
+    if (!giftArr) localStorage.setItem('GiftsArr', JSON.stringify(GiftsArr))
+    arrGift.current = giftArr
+  }, [])
+
+
+
 
   const renderTime = () => {
     if (startTime) {
@@ -64,8 +72,11 @@ const TakeGift = () => {
   }
 
   const renderGift = () => {
-    if (!gift) return null
-    const item = getRandomItem(GiftsArr)
+    const item = getRandomItem(arrGift.current)
+    if (!item) return <div>ПОДАРКИ ЗАКОНЧИЛИСЬ :(</div>
+    console.log('ЕЕЕЕ БЛЯХЯ МУХА')
+    localStorage.setItem('GiftsArr', JSON.stringify(arrGift.current.filter((x: {name: string, icon: string}) => x.name !== item.name)))
+
     return (
       <div>
         <ImgWrapper>
@@ -89,7 +100,7 @@ const TakeGift = () => {
   }, [startTime, time]);
   return (
     <TakeGiftContainer>
-      {renderGift()}
+      {gift && renderGift()}
       {renderTime()}
       {!startTime && !gift && <Button onClick={() => setStartTime(true)} fullWidth>ЗАБРАТЬ ПОДАРОК!</Button>}
     </TakeGiftContainer>
