@@ -53,7 +53,7 @@ const TakeGift = () => {
   const [gift, setGift] = React.useState(false);
   const arrGift = React.useRef<Array<{name: string, icon: string}>>([])
   React.useEffect(() => {
-    const giftArr = localStorage.getItem('GiftsArr') ? JSON.parse(localStorage.getItem('GiftsArr') as string) : null
+    const giftArr = localStorage.getItem('GiftsArr') ? JSON.parse(localStorage.getItem('GiftsArr') as string) : []
     if (!giftArr) localStorage.setItem('GiftsArr', JSON.stringify(GiftsArr))
     arrGift.current = giftArr
   }, [])
