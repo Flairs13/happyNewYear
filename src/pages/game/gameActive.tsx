@@ -2,6 +2,7 @@ import styled from "styled-components";
 import {Gamer, GameStatus, IconsData1} from "./index.tsx";
 import {Button, Card, Group,Modal, Text} from "@mantine/core";
 import * as React from "react";
+import {RefObject} from "react";
 
 const GiftsArr = [
   {
@@ -49,7 +50,7 @@ const Time = styled.div`
     margin: 0 10px;
     line-height: 1;
 `
-const TakeGift = (p: {arrGift: {name: string, icon: string}[]}) => {
+const TakeGift = (p: {arrGift: RefObject<{ name: string; icon: string; }[]>}) => {
   const [startTime, setStartTime] = React.useState(false);
   const [time, setTime] = React.useState(10);
   const [gift, setGift] = React.useState(false);
@@ -57,10 +58,14 @@ const TakeGift = (p: {arrGift: {name: string, icon: string}[]}) => {
   const winnerGift = React.useRef<{name: string, icon: string}>(null);
 
   React.useEffect(() => {
-    const item = getRandomItem(p.arrGift)
+    console.log(p.arrGift.current, 'SUKAAAAAA')
+    const item = getRandomItem(p.arrGift.current)
     if (item && !gift){
       winnerGift.current = item
-      localStorage.setItem('GiftsArr', JSON.stringify(p.arrGift.filter((x: {name: string, icon: string}) => x.name !== item.name)))
+      const arrFiltered = p.arrGift.current.filter((x: {name: string, icon: string}) => x.name !== item.name)
+      console.log(arrFiltered, item,'ah suka')
+      p.arrGift.current = arrFiltered;
+      localStorage.setItem('GiftsArr', JSON.stringify(arrFiltered))
     }
   },[gift])
 
@@ -76,7 +81,7 @@ const TakeGift = (p: {arrGift: {name: string, icon: string}[]}) => {
   }
 
   const renderGift = () => {
-    if (p.arrGift.length === 0) return <div>ПОДАРКИ ЗАКОНЧИЛИСЬ :(</div>
+    if (p.arrGift.current.length === 0) return <div>ПОДАРКИ ЗАКОНЧИЛИСЬ :(</div>
 
     if (winnerGift.current){
       return (
@@ -133,6 +138,7 @@ type Props = {
   gameStatus: GameStatus,
   activeGamers: Record<string, Gamer>,
   setGameStatus: (x: GameStatus) => void,
+  continueGame: () => void
 
 }
 
@@ -146,8 +152,6 @@ const calcWinner = (active: Record<string, Gamer>, deleted: Record<string, Gamer
 export const GameActive = (p: Props) => {
   const winner = calcWinner(p.activeGamers, p.deletedGamers);
 
-
-  console.log('GAME STATUS', p.gameStatus)
 
   const rednerWinner = () => {
     if (winner) {
@@ -192,7 +196,10 @@ export const GameActive = (p: Props) => {
     <div>
       <Modal size="100%" opened={p.gameStatus === 'finished'} onClose={() => p.setGameStatus('notActive')}>
         {rednerWinner()}
-        <TakeGift arrGift={arrGift.current}/>
+        <TakeGift arrGift={arrGift}/>
+        <Button onClick={() => {
+          p.continueGame()
+        }}>Продолжить Игру!</Button>
       </Modal>
     </div>
   );

@@ -63,8 +63,9 @@ export type Gamer = {
 
 type PropsGamer = {
   index: number;
-  removeGamer: (index: number, id: string) => void;
+  removeGamer: (id: string) => void;
   setGamer: (gamer: Gamer) => void;
+  gamer: Gamer
 }
 
 const ImgWrapper = styled.div`
@@ -127,14 +128,13 @@ const GamerControl = styled.div``
 
 const GamerComponent = (p: PropsGamer) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const id = React.useId()
-  const [gender, setGender] = React.useState<Icons>('redEye');
+  const [gender, setGender] = React.useState<Icons>(p.gamer.gender);
   const [name, setName] = React.useState('');
   const numberGamer = p.index + 1;
 
   const currItem = IconsData1[gender]
 
-  const onBlur = () => p.setGamer({name, gender, id})
+  const onBlur = () => p.setGamer({name, gender, id: p.gamer.id})
   return (
     <>
       <GamerWrapper>
@@ -162,7 +162,7 @@ const GamerComponent = (p: PropsGamer) => {
             {currItem.info}
           </Text>
           <Button onClick={() => {
-            p.removeGamer(p.index, id)
+            p.removeGamer(p.gamer.id)
           }} color="blue" fullWidth mt="md" radius="md">
             Удалить игрока {numberGamer}
           </Button>
@@ -176,7 +176,7 @@ const GamerComponent = (p: PropsGamer) => {
                 <RadioWrapper className={gender === x.name ? 'active' : undefined} onClick={() => {
                   setGender(x.name)
                   setIsOpen(false)
-                  p.setGamer({name, gender: x.name, id})
+                  p.setGamer({name, gender: x.name, id: p.gamer.id})
                 }}>
                   <ImgWrapper>
                     <img src={x.src} alt="red eye"/>
@@ -305,11 +305,23 @@ const GameBody = styled.div`
 `
 export const Game = () => {
 
-  const [gamersCountArr, setGamersCount] = React.useState([1, 2]);
+  const [gamersCountArr, setGamersCount] = React.useState<Record<string, Gamer>>({
+    first: {name: '', id: 'first', gender: 'redEye'},
+    two: {name: '', id: 'two', gender: 'lemurio'},
+  });
+
   const [gameStatus, setGameStatus] = React.useState<GameStatus>('notActive');
   const [activeGamers, setActiveGamers] = React.useState<Record<string, Gamer>>({});
   const [deletedGamers, setDeletedGamers] = React.useState<Record<string, Gamer>>({});
 
+  const continueGame = () => {
+    setDeletedGamers({})
+    setGameStatus('notActive')
+  }
+
+  const resetGifts = () => {
+      localStorage.clear()
+  }
 
 
   const setActiveGamer = (gamer: Gamer) => {
@@ -319,9 +331,14 @@ export const Game = () => {
     setDeletedGamers(prev => ({...prev, [gamer.id]: gamer}))
   }
 
-  const removeGamer = (index: number, id: string) => {
-    if (gamersCountArr.length === 1) return;
-    setGamersCount(prev => prev.slice(0, index).concat(prev.slice(index + 1)))
+  const removeGamer = (id: string) => {
+    if (Object.values(gamersCountArr).length === 1) return;
+    // setGamersCount(prev => prev.slice(0, index).concat(prev.slice(index + 1)))
+    setGamersCount(prev => {
+      const newGamers = {...prev}
+      delete newGamers[id]
+      return newGamers
+    })
     setActiveGamers(prev => {
       const newGamers = {...prev}
       delete newGamers[id]
@@ -329,8 +346,12 @@ export const Game = () => {
     })
   }
 
+
   const addGamer = () => {
-    setGamersCount(prev => [...prev, 1])
+    const id = Math.random().toString(16).slice(2)
+    setGamersCount(prev => {
+      return {...prev, [id]: {name: '', gender: 'redEye', id}}
+    })
   }
 
   return (
@@ -340,7 +361,8 @@ export const Game = () => {
           <InputsGamerWrapper>
             <Button color={"#ecb11a"} onClick={addGamer}>Добавить игрока</Button>
             <GamersFieldSetWrapper>
-              {gamersCountArr.map((_, index) => <GamerComponent setGamer={setActiveGamer} key={index} index={index} removeGamer={removeGamer}/>)}
+              {Object.values(gamersCountArr).map((gamer, index) =>
+                <GamerComponent setGamer={setActiveGamer} index={index} key={gamer.id} gamer={gamer} removeGamer={removeGamer}/>)}
             </GamersFieldSetWrapper>
           </InputsGamerWrapper>
         </GamersContainer>
@@ -357,8 +379,14 @@ export const Game = () => {
             <Button>Начать игру!!!!!!!</Button>
           </ButtonStartGame>
         )}
-        <GameActive setGameStatus={(x: GameStatus) => setGameStatus(x)} deletedGamers={deletedGamers} activeGamers={activeGamers} gameStatus={gameStatus} />
+        <GameActive
+          setGameStatus={(x: GameStatus) => setGameStatus(x)}
+          deletedGamers={deletedGamers}
+          activeGamers={activeGamers}
+          continueGame={continueGame}
+          gameStatus={gameStatus}/>
       </GameBody>
+      <Button onClick={resetGifts}>Сброс подарков</Button>
     </Container>
   );
 };
