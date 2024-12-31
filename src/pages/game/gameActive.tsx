@@ -13,6 +13,7 @@ import podstavkaDerevo from '../../assets/gifts/podstavkaDerevo.jpg'
 import monkey from '../../assets/gifts/monkey.jpg'
 import podstavkaJelezo from '../../assets/gifts/podstavkaJelezo.jpg'
 
+
 const GiftsArr = [
   {
     name: 'toporMeme',
