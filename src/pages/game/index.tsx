@@ -347,7 +347,7 @@ const ActiveGamers = styled.div``
 const ButtonStartGame = styled.div`
     position: fixed;
     right: 20px;
-    top: 20px;
+    top: 80px;
 `
 const GameBody = styled.div`
     position: relative;
