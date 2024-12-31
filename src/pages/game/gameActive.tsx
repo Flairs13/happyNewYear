@@ -2,24 +2,57 @@ import styled from "styled-components";
 import {Gamer, GameStatus, IconsData1} from "./index.tsx";
 import {Button, Card, Group,Modal, Text} from "@mantine/core";
 import * as React from "react";
-import {RefObject} from "react";
+import toporMeme from '../../assets/gifts/toporMeme.jpg'
+import mishkaMeme from '../../assets/gifts/mishkaMeme.jpg'
+import bookMeme from '../../assets/gifts/bookMeme.jpg'
+import santaMeme from '../../assets/gifts/santaMeme.jpg'
+import animeGirlMeme from '../../assets/gifts/animeGirlMeme.jpg'
+import catMeme from '../../assets/gifts/catMeme.jpg'
+import catOgon from '../../assets/gifts/catOgon.jpg'
+import podstavkaDerevo from '../../assets/gifts/podstavkaDerevo.jpg'
+import monkey from '../../assets/gifts/monkey.jpg'
+import podstavkaJelezo from '../../assets/gifts/podstavkaJelezo.jpg'
 
 const GiftsArr = [
   {
-    name: 'Топор',
-    icon: 'https://img.freepik.com/premium-vector/axe-editable-doodle-hand-drawn-icon-axe-camping-hiking-local-tourism-illustration_549897-848.jpg',
+    name: 'toporMeme',
+    icon: toporMeme,
   },
   {
-    name: 'Земля',
-    icon: 'https://cdn.pixabay.com/photo/2011/12/13/14/31/earth-11015_640.jpg',
+    name: 'mishkaMeme',
+    icon: mishkaMeme,
   },
   {
-    name: 'Телепузик',
-    icon: 'https://masterpiecer-images.s3.yandex.net/e6dc58cb825a11eeb3fabe3d04098890:upscaled',
+    name: 'bookMeme',
+    icon: bookMeme,
   },
   {
-    name: 'Город',
-    icon: 'https://www.astons.com/wp-content/uploads/2024/03/article_poptown_tokio.webp',
+    name: 'santaMeme',
+    icon: santaMeme,
+  },
+  {
+    name: 'animeGirlMeme',
+    icon: animeGirlMeme,
+  },
+  {
+    name: 'catMeme',
+    icon: catMeme,
+  },
+  {
+    name: 'catOgon',
+    icon: catOgon,
+  },
+  {
+    name: 'podstavkaDerevo',
+    icon: podstavkaDerevo,
+  },
+  {
+    name: 'monkey',
+    icon: monkey,
+  },
+  {
+    name: 'podstavkaJelezo',
+    icon: podstavkaJelezo,
   },
 ]
 
@@ -50,7 +83,7 @@ const Time = styled.div`
     margin: 0 10px;
     line-height: 1;
 `
-const TakeGift = (p: {arrGift: RefObject<{ name: string; icon: string; }[]>}) => {
+const TakeGift = (p: {arrGift: Array<{name: string, icon: string}>, setArrGift: (x:Array<{name: string, icon: string}> ) => void}) => {
   const [startTime, setStartTime] = React.useState(false);
   const [time, setTime] = React.useState(10);
   const [gift, setGift] = React.useState(false);
@@ -58,13 +91,13 @@ const TakeGift = (p: {arrGift: RefObject<{ name: string; icon: string; }[]>}) =>
   const winnerGift = React.useRef<{name: string, icon: string}>(null);
 
   React.useEffect(() => {
-    console.log(p.arrGift.current, 'SUKAAAAAA')
-    const item = getRandomItem(p.arrGift.current)
+    console.log(p.arrGift, 'SUKAAAAAA')
+    const item = getRandomItem(p.arrGift)
     if (item && !gift){
       winnerGift.current = item
-      const arrFiltered = p.arrGift.current.filter((x: {name: string, icon: string}) => x.name !== item.name)
+      const arrFiltered = p.arrGift.filter((x: {name: string, icon: string}) => x.name !== item.name)
       console.log(arrFiltered, item,'ah suka')
-      p.arrGift.current = arrFiltered;
+      p.setArrGift(arrFiltered);
       localStorage.setItem('GiftsArr', JSON.stringify(arrFiltered))
     }
   },[gift])
@@ -81,7 +114,7 @@ const TakeGift = (p: {arrGift: RefObject<{ name: string; icon: string; }[]>}) =>
   }
 
   const renderGift = () => {
-    if (p.arrGift.current.length === 0) return <div>ПОДАРКИ ЗАКОНЧИЛИСЬ :(</div>
+    if (p.arrGift.length === 0) return <div>ПОДАРКИ ЗАКОНЧИЛИСЬ :(</div>
 
     if (winnerGift.current){
       return (
@@ -177,12 +210,16 @@ export const GameActive = (p: Props) => {
     }
   }
 
-  const arrGift = React.useRef<Array<{name: string, icon: string}>>([])
+  const [arrGift, setArrGift] = React.useState<Array<{name: string, icon: string}>>([])
 
   React.useEffect(() => {
-    const giftArr = localStorage.getItem('GiftsArr') ? JSON.parse(localStorage.getItem('GiftsArr') as string) : null
-    if (!giftArr) localStorage.setItem('GiftsArr', JSON.stringify(GiftsArr))
-    arrGift.current = giftArr
+    const giftArr = localStorage.getItem('GiftsArr') ? JSON.parse(localStorage.getItem('GiftsArr') as string) : []
+    if (giftArr.length === 0){
+      localStorage.setItem('GiftsArr', JSON.stringify(GiftsArr))
+      setArrGift(GiftsArr)
+    } else {
+      setArrGift(giftArr);
+    }
   }, [])
 
 
@@ -196,7 +233,7 @@ export const GameActive = (p: Props) => {
     <div>
       <Modal size="100%" opened={p.gameStatus === 'finished'} onClose={() => p.setGameStatus('notActive')}>
         {rednerWinner()}
-        <TakeGift arrGift={arrGift}/>
+        <TakeGift setArrGift={(x) => setArrGift(x)} arrGift={arrGift}/>
         <Button onClick={() => {
           p.continueGame()
         }}>Продолжить Игру!</Button>
