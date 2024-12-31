@@ -12,6 +12,7 @@ import catOgon from '../../assets/gifts/catOgon.jpg'
 import podstavkaDerevo from '../../assets/gifts/podstavkaDerevo.jpg'
 import monkey from '../../assets/gifts/monkey.jpg'
 import podstavkaJelezo from '../../assets/gifts/podstavkaJelezo.jpg'
+import winnerVideo from '../../assets/winner.mp4'
 
 
 const GiftsArr = [
@@ -152,9 +153,9 @@ const TakeGift = (p: {arrGift: Array<{name: string, icon: string}>, setArrGift: 
 
 
 const ImgWrapper = styled.div`
-    width: 500px;
+    width: 400px;
     margin: 0 auto;
-    height: 500px;
+    height: 400px;
 
     & > img {
         width: 100%;
@@ -184,6 +185,17 @@ const calcWinner = (active: Record<string, Gamer>, deleted: Record<string, Gamer
     return active[winnerId[0]];
   }
 }
+
+const ContainerVideo = styled.div`
+    height: 770px;
+    position: relative;
+    z-index: 9;
+`
+const Video = styled.video`
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+`
 export const GameActive = (p: Props) => {
   const winner = calcWinner(p.activeGamers, p.deletedGamers);
 
@@ -194,6 +206,11 @@ export const GameActive = (p: Props) => {
       return (
         <Card shadow="sm" style={{cursor: "pointer"}} padding="lg" radius="xs" withBorder>
           <Text style={{textAlign: 'center'}} fz={60} fw={500}>ПОБЕДИТЕЛЬ!!!</Text>
+          <ContainerVideo>
+            <Video muted autoPlay loop>
+              <source type="video/mp4" src={winnerVideo}/>
+            </Video>
+          </ContainerVideo>
           <Card.Section>
             <ImgWrapper>
               <img src={currItem.src} alt="#"/>
